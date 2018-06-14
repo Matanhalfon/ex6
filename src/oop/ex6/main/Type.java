@@ -3,10 +3,10 @@ package oop.ex6.main;
 import java.util.regex.*;
 
 public class Type {
-    private String var;
+    private String var = null;
     private String type;
     private String name;
-    private boolean IsFinal;
+    private boolean IsFinal = false;
     String[] TYPES_list = new String[]{"boolean", "int", "double", "String", "char"};
     private final int Boolean = 0;
     private final int Int = 1;
@@ -29,11 +29,15 @@ public class Type {
     private static final Pattern CHARP = Pattern.compile(CHAR);
 
 
-    public Type(String type, String var, String name, boolean verbose) {
-        this.var = var;
+    Type(String type, String name, String var) throws CompEx {
         this.type = type;
         this.name = name;
-        this.IsFinal = verbose;
+        ChangeVar(var);
+    }
+
+    Type(String type, String name) {
+        this.type = type;
+        this.name = name;
     }
 
     public String getVar() {
@@ -76,6 +80,9 @@ public class Type {
 
         }
         if (IsFinal) {
+            if (this.var.equals(null)) {
+                this.var = var;
+            }
             throw new CompEx();
         }
 
@@ -93,6 +100,10 @@ public class Type {
         } else {
             throw new CompEx();
         }
+    }
+
+    public void setFinal() {
+        IsFinal = true;
     }
 
     public String getType() {

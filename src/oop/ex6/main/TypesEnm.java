@@ -1,7 +1,7 @@
 package oop.ex6.main;
 
 public enum TypesEnm {
-    INT("int"), DOUBLE("double"), BOOLEAN("boolean"), CHAR("char"), STRING("String"),;
+    INT("int"), DOUBLE("double"), BOOLEAN("boolean"), CHAR("char"), STRING("String"),FINAL("final");
     private final String TypeText;
 
     TypesEnm(String TypeText) {
