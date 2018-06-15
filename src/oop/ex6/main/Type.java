@@ -47,7 +47,6 @@ public class Type {
 
     public void ChangeVar(String var) throws CompEx {
 
-
         if (!IsFinal) {
             TypesEnm Enm = TypesEnm.getValue(var);
             switch (Enm) {

@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 public class MethodBlock extends Block {
 
     private static final String goodName = "^[a-zA-Z]";
+    private static final String METHOD_END = "return";
     protected ArrayList<Type> DEFINED_VAR;
     private Method method;
     /*
@@ -17,7 +18,6 @@ public class MethodBlock extends Block {
         super(SjavaLines);
         AddVars(Block.DEFINED_VAR);
         CheckBlock(lines);
-
     }
 
     private void AddVars(ArrayList<Type> globalvars) {
@@ -26,12 +26,16 @@ public class MethodBlock extends Block {
 
     private void CheckBlock(String[] lines) throws CompEx{
         //this.method = buildMethod(lines[0]);
-        for (int i = 1; i<lines.length; i++){
+        for (int i = 1; i<(lines.length-1); i++){
             this.CheckLine(lines[i]);
+        }
+        if (lines[lines.length-1] != METHOD_END){
+            throw new CompEx();
         }
     }
     private Method buildMethod(String firstLine) throws CompEx{
         String methodName = getFirstWord(firstLine);
+        checkEnd(firstLine, "{");
         if (checkMethodName(methodName)) {
             firstLine = firstLine.substring(firstLine.indexOf("("), firstLine.indexOf(")"));
             String[] parm = firstLine.split(",");

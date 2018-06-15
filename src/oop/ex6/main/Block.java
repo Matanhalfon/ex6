@@ -185,7 +185,7 @@ public abstract class Block {
 
     }
 
-    private Type IsDefinedT(String name) {
+    protected Type IsDefinedT(String name) {
         for (Type t : DEFINED_VAR) {
             if (t.getName().equals(name)) {
                 return t;
