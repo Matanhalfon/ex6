@@ -23,8 +23,8 @@ public abstract class Block {
     String[] LOOP_STARTERS = new String[]{"while", "if"};
     String METHOD_start = "void";
     String[] lines;
-    ArrayList<Type> DEFINED_VAR = new ArrayList<Type>();
-    ArrayList<Method> DEFIND_METHODES = new ArrayList<Method>();
+    static ArrayList<Type> DEFINED_VAR = new ArrayList<Type>();
+    static ArrayList<Method> DEFIND_METHODES = new ArrayList<Method>();
     //Regex
     static final String EndLine = "[;]+$";
     static final String StartMethode = "[{]+$";
@@ -67,7 +67,7 @@ public abstract class Block {
      * @return the first word
      */
 
-    private String getFirstWord(String line) {
+    protected String getFirstWord(String line) {
         String[] TheStart = line.split(" ");
         if (TheStart[0].contains("\\(")) {//if there is  a method call
             TheStart = TheStart[0].split("\\(");
@@ -130,10 +130,10 @@ public abstract class Block {
     private void Checkstatment(String line) throws CompEx {
         checkEnd(line, LINEEND);
         String start = getFirstWord(line);
-        if (DEFINED_VAR.contains(start)) {
+        if (this.DEFINED_VAR.contains(start)) {
             CheckAssinment(line);
         }
-        if (DEFIND_METHODES.contains(start)) {
+        if (this.DEFIND_METHODES.contains(start)) {
             if (!CheckMethod_call(line)) {
                 throw new CompEx();
             }
