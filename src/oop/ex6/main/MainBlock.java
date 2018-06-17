@@ -34,7 +34,7 @@ public class MainBlock extends Block {
         int index = 0;
         String line = null;
         while (index < this.lines.size()) {
-            line = clearSpaces(this.lines.get(index));
+            line = this.lines.get(index).trim();
             while (0 < this.barketCount) {
                 scopeLines.add(line);
                 index++;

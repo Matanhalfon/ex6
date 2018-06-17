@@ -22,7 +22,7 @@ public abstract class Block {
     String[] TYPES_Start = new String[]{"boolean", "int", "double", "String", "char", "final"};
     String[] LOOP_STARTERS = new String[]{"while", "if"};
     String METHOD_start = "void";
-    String[] lines;
+    ArrayList<String> lines;
     static ArrayList<Type> DEFINED_VAR = new ArrayList<Type>();
     static ArrayList<Method> DEFIND_METHODES = new ArrayList<Method>();
     //Regex
@@ -31,7 +31,7 @@ public abstract class Block {
     static final String EndMethode = "[}]+$";
     static final String EmpteyLine = "\\s*";// TODO: 6/12/2018 find emepty lines and not add them to the checked one
 
-    public Block(String[] SjavaLines) {
+    public Block(ArrayList<String> SjavaLines) {
         this.lines = SjavaLines;
     }
 
