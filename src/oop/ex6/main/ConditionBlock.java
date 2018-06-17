@@ -8,7 +8,7 @@ public class ConditionBlock extends Block {
      *
      * @param SjavaLines
      */
-    public ConditionBlock(String[] SjavaLines) {
+    public ConditionBlock(ArrayList<String> SjavaLines) {
         super(SjavaLines);
     }
 

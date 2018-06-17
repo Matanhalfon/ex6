@@ -6,13 +6,13 @@ public class Method {
     private String name;
     private ArrayList<Type> parameters;
 
-    public Method(String name, String[] parmeters) {
+    public Method(String name, String[] parmeters) throws CompEx {
         this.name = name;
         BulidParmeters(parmeters);
     }
 
 
-    private void BulidParmeters(String[] paramArgs) {
+    private void BulidParmeters(String[] paramArgs) throws CompEx {
         for (String s : paramArgs) {
             String[] sArray = s.split(" ");
             if (sArray.length == 3) {
