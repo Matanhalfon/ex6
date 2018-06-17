@@ -12,6 +12,7 @@ public class ConditionBlock extends Block {
     private static final String STRING = ".+";
     private static final String CHAR = ".{1}";
     private static final String EQUALS = "=";
+    private static final String DOUBLEEQLS = "==";
 
     /**
      * create a methode that run over the internal lines and throw if needed
@@ -51,7 +52,7 @@ public class ConditionBlock extends Block {
             if (conditionType(var)){
                 return true;
             }
-            String[] conInner = var.split("==");
+            String[] conInner = var.split(DOUBLEEQLS);
             Type con = IsDefinedT(conInner[0]);
             if (con != null && con.getVar()!=null){
                 return true;
