@@ -11,10 +11,11 @@ public class MethodBlock extends Block {
     private static final String METHOD_END = "return";
     protected ArrayList<Type> DEFINED_VAR;
     private Method method;
+
     /*
     need to support getting a balck of lines and then run over and throw if needed
      */
-    public MethodBlock(String[] SjavaLines) throws CompEx{
+    public MethodBlock(String[] SjavaLines) throws CompEx {
         super(SjavaLines);
         AddVars(Block.DEFINED_VAR);
         CheckBlock(lines);
@@ -24,16 +25,17 @@ public class MethodBlock extends Block {
         this.DEFINED_VAR.addAll(globalvars);
     }
 
-    private void CheckBlock(String[] lines) throws CompEx{
+    private void CheckBlock(String[] lines) throws CompEx {
         //this.method = buildMethod(lines[0]);
-        for (int i = 1; i<(lines.length-1); i++){
+        for (int i = 1; i < (lines.length - 1); i++) {
             this.CheckLine(lines[i]);
         }
-        if (lines[lines.length-1] != METHOD_END){
+        if (lines[lines.length - 1] != METHOD_END) {
             throw new CompEx();
         }
     }
-    private Method buildMethod(String firstLine) throws CompEx{
+
+    private Method buildMethod(String firstLine) throws CompEx {
         String methodName = getFirstWord(firstLine);
         checkEnd(firstLine, "{");
         if (checkMethodName(methodName)) {
@@ -44,8 +46,8 @@ public class MethodBlock extends Block {
         throw new CompEx();
     }
 
-    private boolean checkMethodName(String name){
-        if (name.length()==0) {
+    private boolean checkMethodName(String name) {
+        if (name.length() == 0) {
             return false;
         }
         Pattern pattern = Pattern.compile(goodName);
