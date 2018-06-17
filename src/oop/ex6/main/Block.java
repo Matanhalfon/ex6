@@ -1,10 +1,8 @@
 package oop.ex6.main;
 
-import com.sun.jdi.Value;
+import java.util.regex.*;
 
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public abstract class Block {
@@ -13,9 +11,6 @@ public abstract class Block {
     private static final int StartLoop = 3;
     private static final int CheckLine = 4;
     private static final int CheckMethod = 5;
-    private static final int VARIABLE = 0;
-    private static final int VALUE = 1;
-    private static final int FIRSTWORD = 0;
     private static final String equles = "=";
     private static final String VARS = "vars";
     private static final String METHOD = "METHOD";
@@ -27,18 +22,16 @@ public abstract class Block {
     String[] TYPES_Start = new String[]{"boolean", "int", "double", "String", "char", "final"};
     String[] LOOP_STARTERS = new String[]{"while", "if"};
     String METHOD_start = "void";
-    ArrayList<String> lines;
-    ArrayList<Type> DEFINED_VAR = new ArrayList<Type>();
-    ArrayList<Method> DEFIND_METHODES = new ArrayList<Method>();
+    String[] lines;
+    static ArrayList<Type> DEFINED_VAR = new ArrayList<Type>();
+    static ArrayList<Method> DEFIND_METHODES = new ArrayList<Method>();
     //Regex
-    static final String Spacses = "^\\s+|\\s+$";
-    private static String Equels="=";
-    Pattern equePat=Pattern.compile(Equels);
-    private static final String EndLine = ";";
-    private static final String StartMethode = "\\{";
-    private static final String EndMethode = "}";
+    static final String EndLine = "[;]+$";
+    static final String StartMethode = "[{]+$";
+    static final String EndMethode = "[}]+$";
+    static final String EmpteyLine = "\\s*";// TODO: 6/12/2018 find emepty lines and not add them to the checked one
 
-    public Block(ArrayList<String> SjavaLines) {
+    public Block(String[] SjavaLines) {
         this.lines = SjavaLines;
     }
 
@@ -50,26 +43,21 @@ public abstract class Block {
      * @throws CompEx if it not a legal ender
      */
 
-    private String checkEnd(String line, String suffix) throws CompEx {
-        String pattern = null;
+    public void checkEnd(String line, String suffix) throws CompEx {
+        Pattern pattern = null;
         switch (suffix) {
             case LINEEND:
-                pattern = EndLine;
-                break;
+                pattern = Pattern.compile(EndLine);
             case BLOOKSTART:
-                pattern = StartMethode;
-                break;
+                pattern = Pattern.compile(StartMethode);
             case BLOOKEND:
-                pattern = EndMethode;
-                break;
+                pattern = Pattern.compile(EndMethode);
 
         }
-        if (!line.endsWith(pattern)) {
-            throw new CompEx("illegal end");
-        } else {
-            return line.substring(0, line.length() - 1);
+        Matcher matcher = pattern.matcher(line);
+        if (!matcher.find()) {
+            throw new CompEx();
         }
-
     }
 
     /**
@@ -79,12 +67,12 @@ public abstract class Block {
      * @return the first word
      */
 
-    private String getFirstWord(String line) {
+    protected String getFirstWord(String line) {
         String[] TheStart = line.split(" ");
-        if (TheStart[FIRSTWORD].contains("\\(")) {//if there is  a method call
-            TheStart = TheStart[FIRSTWORD].split("\\(");
+        if (TheStart[0].contains("\\(")) {//if there is  a method call
+            TheStart = TheStart[0].split("\\(");
         }
-        return TheStart[FIRSTWORD];
+        return TheStart[0];
     }
 
     /**
@@ -113,14 +101,17 @@ public abstract class Block {
         if (start.equals(METHOD)) {
             return CreateMethod;
         }
-        if ((IsDefinedT(start) != null) || (IsDefinedM(start) != null)) {
+        if (DEFINED_VAR.contains(start)) {
             return CheckLine;
         }
-        throw new CompEx("illegal line starter");
+        if (DEFIND_METHODES.contains(start)) {
+            return CheckMethod;
+        }
+        throw new CompEx();
     }
 
 
-    void CheckLine(String line) throws CompEx {
+    public void CheckLine(String line) throws CompEx {
         int mark = CheckStart(line);
         switch (mark) {
             case CreateType:
@@ -132,23 +123,21 @@ public abstract class Block {
                 CreateMethode(line);
                 break;
             case CheckLine:
-                CheckStatment(line);
+                CheckAssinment(line);
         }
     }
 
-    private void CheckStatment(String line) throws CompEx {
-        line = checkEnd(line, LINEEND);
+    private void Checkstatment(String line) throws CompEx {
+        checkEnd(line, LINEEND);
         String start = getFirstWord(line);
-        if (IsDefinedT(start) != null) {
+        if (this.DEFINED_VAR.contains(start)) {
             CheckAssinment(line);
-            return;
         }
-        if (IsDefinedM(start) != null) {
+        if (this.DEFIND_METHODES.contains(start)) {
             if (!CheckMethod_call(line)) {
                 throw new CompEx();
             }
-            return;
-        }else
+        }
         throw new CompEx();
     }
 
@@ -157,7 +146,7 @@ public abstract class Block {
         String[] lineArray = line.split("\\(");
         Method met = IsDefinedM(lineArray[0]);
         if (met != null) {//the method  has been created
-            String param = lineArray[1].substring(0, lineArray[1].length() - 1);
+            String param = lineArray[1].substring(0, lineArray[1].length() - 2);
             String[] paramArray = param.split(",");
             for (int i = 0; i < paramArray.length; i++) {
                 Type parmeter = IsDefinedT(paramArray[i]);
@@ -170,29 +159,19 @@ public abstract class Block {
         return false;
     }
 
-    /**
-     * a method that check if the assignment is legal
-     *
-     * @param line the of the assignment
-     * @throws CompEx
-     */
-
 
     private void CheckAssinment(String line) throws CompEx {
         String[] lineArray = line.split(equles);
         if (lineArray.length < 2) {
             throw new CompEx();
         }
-        Type arg = IsDefinedT((clearSpaces(lineArray[VARIABLE])));
-        Type var = IsDefinedT(clearSpaces(lineArray[VALUE]));
+        Type arg = IsDefinedT(lineArray[0]);
+        Type var = IsDefinedT(lineArray[1]);
         if (var != null) {
-            if (var.getVar() == null) {
-                throw new CompEx();
-            }
             arg.ChangeVar(var.getVar());
         }
         if (var == null) {
-            arg.ChangeVar(lineArray[VALUE]);
+            arg.ChangeVar(lineArray[1]);
         }
     }
 
@@ -206,11 +185,7 @@ public abstract class Block {
 
     }
 
-    protected String clearSpaces(String line) {
-        return line.replaceAll(Spacses, "");
-    }
-
-    private Type IsDefinedT(String name) {
+    protected Type IsDefinedT(String name) {
         for (Type t : DEFINED_VAR) {
             if (t.getName().equals(name)) {
                 return t;
@@ -229,7 +204,7 @@ public abstract class Block {
 
     private void CreateMethode(String line) throws CompEx {
 
-        line = checkEnd(line, BLOOKSTART);
+        checkEnd(line, BLOOKSTART);
         String met = getFirstWord(line);
         line = line.substring(met.length(), line.length());
         String name = getFirstWord(line);
@@ -243,88 +218,37 @@ public abstract class Block {
         }
     }
 
-
-    private void SetVariable(String line, String type, boolean isfinal) throws CompEx {
-
-        String[] lineArray = line.split(equles);
-        lineArray[VARIABLE] = clearSpaces(lineArray[VARIABLE]);
-        lineArray[VALUE] = clearSpaces(lineArray[VALUE]);
-        if (IsDefinedT(lineArray[VARIABLE]) == null) {
-            Type val = IsDefinedT(lineArray[VALUE]);
-            if (val != null) {
-                if (val.getVar() != null) {
-                    if (val.getType().equals("double") && type.equals("int")) {
-                        throw new CompEx("fuck you");
-                    }
-                    lineArray[VALUE] = val.getVar();
-                } else {
-                    throw new CompEx("try to assign null");
-                }
-            }
-            Type ToAdd = new Type(type, lineArray[VARIABLE], lineArray[VALUE]);
-            if (isfinal) {
-                ToAdd.setFinal();
-                DEFINED_VAR.add(ToAdd);
-            } else {
-                this.DEFINED_VAR.add(ToAdd);
-            }
-        } else {
-            throw new CompEx("variablewas assigned ");
-        }
-
-    }
-
-    private boolean PlaceVariavle(String type, String name, boolean Isfinal) throws CompEx {
-        if (Isfinal) {
-            throw new CompEx("cannt start final without value");
-        }
-        name = clearSpaces(name);
-        if (IsDefinedT(name) == null) {
-            Type toadd = new Type(type, name);
-            DEFINED_VAR.add(toadd);
-            return true;
-        }
-        return false;
-    }
-    private boolean containsEqules(String line)throws CompEx {
-        int count=0;
-        Matcher mach=equePat.matcher(line);
-        while (mach.find()){
-            count++;
-        }
-        if(count==1){
-            return true;
-        }
-        if (count==0){
-            return false;
-        }
-        else{
-            throw new CompEx();
-        }
-    }
-
-
     private void CreateType(String line) throws CompEx {
-
-        line = checkEnd(line, LINEEND);
-        if (line.endsWith(",")) {
-            throw new CompEx();
-        }
+        checkEnd(line, LINEEND);
         String type = getFirstWord(line);
         boolean IsFinal = false;
         if (type.equals("final")) {
             IsFinal = true;
-            line = clearSpaces(line.substring(type.length(), line.length()));//cut the final and the space after
+            line = line.substring(type.length(), line.length());
             type = getFirstWord(line);
         }
-        line = line.substring(type.length() + 1, line.length());//cut the type and the space after
-        String[] lineArray = line.split(",");//if it is a multi assignment cut to some parts
+        line = line.substring(type.length(), line.length());
+        String[] lineArray = line.split(",");
         for (String s : lineArray) {
-            if (containsEqules(s)) {//if assignment
-                SetVariable(s, type, IsFinal);
-            } else {
-                if (!PlaceVariavle(type, s, IsFinal)) {//if declaration
+            if (s.contains(equles)) {
+                String[] sArray = s.split(equles);
+                if (IsDefinedT(sArray[0]) == null) {// TODO: 6/14/2018 magic
+                    Type ToAdd = new Type(type, sArray[0], sArray[1]);
+                    if (IsFinal) {
+                        ToAdd.setFinal();
+                        DEFINED_VAR.add(ToAdd);
+                    }
+                } else {
                     throw new CompEx();
+                }
+            } else {
+                if (IsDefinedT(s) == null) {
+                    Type ToAdd = new Type(type, s);
+                    if (IsFinal) {
+                        ToAdd.setFinal();
+                        DEFINED_VAR.add(ToAdd);
+                    } else throw new CompEx();
+
                 }
             }
 

@@ -16,12 +16,12 @@ public class Type {
 
 
     //Regex
-    private static final String GoodName = "\\s*[_]\\w+\\s*|\\s*[a-zA-Z]+\\w*\\s*";
-    private static final String INT = "\\s*\\-?\\d+\\s*";
-    private static final String DOUBLE = "\\s*\\-?\\d*[.]\\d+\\s*";
-    private static final String BOOLEAN = "(true){1}|(false){1}";
-    private static final String STRING = "\\s*\".*\"\\s*";
-    private static final String CHAR = "\\s*\'.{1}\'\\s*";
+    private static final String GoodName = "^[_]\\w+|[a-zA-Z]+\\w";
+    private static final String INT = "\\d+";
+    private static final String DOUBLE = "\\d*[.]\\d+";
+    private static final String BOOLEAN = "[true,false]";
+    private static final String STRING = ".+";
+    private static final String CHAR = ".{1}";
     private static final Pattern INTP = Pattern.compile(INT);
     private static final Pattern DOUBLEP = Pattern.compile(DOUBLE);
     private static final Pattern BOOLEANP = Pattern.compile(BOOLEAN);
@@ -31,65 +31,51 @@ public class Type {
 
     Type(String type, String name, String var) throws CompEx {
         this.type = type;
-        setName(name);
+        this.name = name;
         ChangeVar(var);
     }
 
-    Type(String type, String name) throws CompEx {
+    Type(String type, String name) {
         this.type = type;
-        setName(name);
+        this.name = name;
     }
 
     public String getVar() {
         return var;
     }
 
-//    public void assignType(Type value) throws CompEx {
-//        if (value.getType().equals(this.type)) {
-//            if (value.getVar() != null) {
-//                this.var = value.getVar();
-//            } else {
-//                throw new CompEx("try to asiighn null ");
-//            }
-//        } else {
-//            throw new CompEx("try to place illegal type");
-//        }
-//    }
-
 
     public void ChangeVar(String var) throws CompEx {
 
 
         if (!IsFinal) {
-            TypesEnm Enm = TypesEnm.getValue(this.type);
+            TypesEnm Enm = TypesEnm.getValue(var);
             switch (Enm) {
                 case INT:
                     if (var.matches(INT)) {
                         this.var = var;
                         break;
-                    } else throw new CompEx("ilegal value I");
+                    } else throw new CompEx();
                 case DOUBLE:
                     if (var.matches(INT) || var.matches(DOUBLE)) {
                         this.var = var;
                         break;
-                    } else throw new CompEx("ilegal value D");
+                    } else throw new CompEx();
                 case CHAR:
                     if (var.matches(CHAR)) {
                         this.var = var;
                         break;
-                    } else throw new CompEx("ilegal value C");
+                    } else throw new CompEx();
                 case BOOLEAN:
                     if (var.matches(BOOLEAN) || var.matches(INT) || var.matches(DOUBLE)) {
                         this.var = var;
                         break;
-                    } else {
-                        throw new CompEx("ilegal value B");
                     }
                 case STRING:
                     if (var.matches(STRING)) {
                         this.var = var;
                         break;
-                    } else throw new CompEx("ilegal value S");
+                    } else throw new CompEx();
             }
 
         }
@@ -97,22 +83,22 @@ public class Type {
             if (this.var.equals(null)) {
                 this.var = var;
             }
-            throw new CompEx("try to change final");
+            throw new CompEx();
         }
 
     }
 
     public String getName() {
-        return name;
+        return var;
     }
 
     private void setName(String name) throws CompEx {
         Pattern pattern = Pattern.compile(GoodName);
         Matcher match = pattern.matcher(name);
-        if (match.matches()) {
-            this.name = name.trim();
+        if (match.find()) {
+            this.var = name;
         } else {
-            throw new CompEx("illegal name");
+            throw new CompEx();
         }
     }
 
@@ -131,7 +117,7 @@ public class Type {
                 return;
             }
         }
-        throw new CompEx("illegal type");
+        throw new CompEx();
 
 
     }

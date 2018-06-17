@@ -6,7 +6,7 @@ public class MethodBlock extends Block {
     /*
     need to support getting a balck of lines and then run over and throw if needed
      */
-    public MethodBlock(ArrayList<String> SjavaLines) {
+    public MethodBlock(String[] SjavaLines) {
         super(SjavaLines);
     }
 
