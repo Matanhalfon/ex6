@@ -22,12 +22,23 @@ public class ConditionBlock extends Block {
         super(SjavaLines);
     }
 
+    private void checkBlock(String[] lines) throws CompEx{
+        String first = lines[0];
+        checkEnd(first, "{");
+        // cut the condition
+        String condition = first.substring(first.indexOf("("), first.lastIndexOf(")"));
+        CheckCondition(condition);
+        for (int i = 1; i < lines.length; i++){
+            CheckLine(lines[i]);
+        }
+    }
+
 
     public void AddVars(ArrayList<Type> globalvars) {
         this.DEFINED_VAR.addAll(globalvars);
     }
 
-    private boolean CheckCondition(String condition) {
+    private boolean CheckCondition(String condition) throws CompEx {
         String[] conditions = condition.split(OR);
         ArrayList<String> conArry = new ArrayList<String>();
         for (String con : conditions) {
@@ -37,8 +48,16 @@ public class ConditionBlock extends Block {
             }
         }
         for (String var : conArry) {
-
-
+            if (conditionType(var)){
+                return true;
+            }
+            String[] conInner = var.split("==");
+            Type con = IsDefinedT(conInner[0]);
+            if (con != null && con.getVar()!=null){
+                return true;
+            }else {
+                throw new CompEx();
+            }
         }
         return true;
     }
@@ -51,14 +70,15 @@ public class ConditionBlock extends Block {
         } else if (condition.matches(INT) || condition.matches(DOUBLE)) {
             return true;
         } else if (var != null) {
-            if (var.getType().equals(TypesEnm.BOOLEAN) || var.getType().equals(TypesEnm.INT) || var.getType().equals(TypesEnm.DOUBLE)) {
+            if (var.getType().equals(TypesEnm.BOOLEAN) || var.getType().equals(TypesEnm.INT) ||
+                    var.getType().equals(TypesEnm.DOUBLE)) {
                 if (var.getVar() == null) {
                     throw new CompEx();
                 }
                 return true;
             }
-        } //else if (){
-
+            return false;
+        }
         return false;
     }
 }

@@ -44,7 +44,6 @@ public class Type {
         return var;
     }
 
-
     public void ChangeVar(String var) throws CompEx {
 
         if (!IsFinal) {
