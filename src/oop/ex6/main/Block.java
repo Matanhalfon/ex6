@@ -91,9 +91,12 @@ public abstract class Block {
      */
 
     String getFirstWord(String line) {
-        String[] TheStart = line.split(" ");
+        String[] TheStart = line.split("\\s");
         if (TheStart[FIRSTWORD].contains("(")) {//if there is  a method call
             TheStart = TheStart[FIRSTWORD].split("\\(");
+        }
+        if(TheStart[FIRSTWORD].contains("=")){
+            TheStart=TheStart[FIRSTWORD].split("=");
         }
         return clearSpaces(TheStart[FIRSTWORD]);
     }
