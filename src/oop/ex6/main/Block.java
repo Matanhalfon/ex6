@@ -13,8 +13,8 @@ public abstract class Block {
     static final int CheckLine = 4;
     static final int ENDMETHOD = 5;
     static final int RETURN = 6;
-    private static final int VARIABLE = 0;
-    private static final int VALUE = 1;
+    static final int VARIABLE = 0;
+    static final int VALUE = 1;
     private static final int FIRSTWORD = 0;
     private static final String equles = "=";
     static final String RETURNLINE = "return\\s*;?";
@@ -41,6 +41,7 @@ public abstract class Block {
     private Pattern IF = Pattern.compile("^if");
     private Pattern WHILE = Pattern.compile("^while");
     private Pattern[] LOOP_STARTERS = new Pattern[]{IF, WHILE};
+    Block fatherBlock;
 
 
     public Block(ArrayList<String> SjavaLines) {
@@ -122,7 +123,7 @@ public abstract class Block {
         if (start.equals(METHOD_start)) {
             return CreateMethod;
         }
-        if ((IsDefinedT(start) != null) || (IsDefinedM(start) != null)) {
+        if ((IsDefinedTGlob(start) != null) || (IsDefinedM(start) != null)) {
             return CheckLine;
         }
         if (start.matches("}")) {
@@ -157,7 +158,7 @@ public abstract class Block {
     void CheckStatment(String line) throws CompEx {
         line = checkEnd(line, LINEEND);
         String start = getFirstWord(line);
-        if (IsDefinedT(start) != null) {
+        if (IsDefinedTGlob(start) != null) {
             CheckAssinment(line);
             return;
         }
@@ -172,13 +173,13 @@ public abstract class Block {
 
 
     private boolean CheckMethod_call(String line) throws CompEx {
-        String[] lineArray = line.split("\\(");
-        Method met = IsDefinedM(lineArray[0]);
+        String[] lineArray = splitbark(line);
+        Method met = IsDefinedM(clearSpaces(lineArray[0]));
         if (met != null) {//the method  has been created
             String param = checkEnd(lineArray[1], METHODEND);
             String[] paramArray = param.split(",");
             for (int i = 0; i < paramArray.length; i++) {
-                Type parmeter = IsDefinedT(paramArray[i]);
+                Type parmeter = IsDefinedTGlob(paramArray[i]);
                 if (parmeter != null && parmeter.getVar() != null) {
                     paramArray[i] = parmeter.getVar();
                 }
@@ -201,24 +202,25 @@ public abstract class Block {
         if (lineArray.length < 2) {
             throw new CompEx();
         }
-        Type arg = IsDefinedT((clearSpaces(lineArray[VARIABLE])));
-        assignVal(arg,clearSpaces(lineArray[VALUE]));
+        Type arg = IsDefinedTGlob((clearSpaces(lineArray[VARIABLE])));
+        assignVal(arg, clearSpaces(lineArray[VALUE]));
     }
 
 
-    protected  void addType(Type variable){
-        this.DEFINED_VAR.put(variable.getName(),variable);
+    protected void addType(Type variable) {
+        this.DEFINED_VAR.put(variable.getName(), variable);
     }
 
     protected void assignVal(Type arg, String variable) throws CompEx {
-        Type value = IsDefinedT(clearSpaces(variable));
+        Type value = IsDefinedTGlob(clearSpaces(variable));
         if (value != null) {
             if (value.getVar() == null) {
                 throw new CompEx("try to assign null");
             }
+
             arg.ChangeVar(value.getVar());
-        }
-        if (value == null) {
+
+        } else {
             arg.ChangeVar(variable);
         }
     }
@@ -235,25 +237,31 @@ public abstract class Block {
         return line.replaceAll(Spacses, "");
     }
 
-    Type IsDefinedT(String name) {
-        if (DEFINED_VAR.containsKey(name)) {
+    Type IsDefinedTGlob(String name) {
+        Block block = this;
+        if (block.DEFINED_VAR.containsKey(name)) {
             return this.DEFINED_VAR.get(name);
+        }
+        while (block.fatherBlock != null) {
+            block = block.fatherBlock;
+            if (block.DEFINED_VAR.containsKey(name)) {
+                return block.DEFINED_VAR.get(name);
+            }
         }
         return null;
     }
 
 
-
-    private String[] splitbark(String line) throws CompEx{
-        Pattern pat=Pattern.compile("\\(");
-        Matcher mach=pat.matcher(line);
-        if(mach.find()){
-            return new String[]{line.substring(0,mach.start()),line.substring(mach.start()+1,line.length())};
+    private String[] splitbark(String line) throws CompEx {
+        Pattern pat = Pattern.compile("\\(");
+        Matcher mach = pat.matcher(line);
+        if (mach.find()) {
+            return new String[]{line.substring(0, mach.start()), line.substring(mach.start() + 1, line.length())};
         }
         throw new CompEx("no opning barket");
     }
 
-    String[] getMethodName(String line)throws CompEx{
+    String[] getMethodName(String line) throws CompEx {
         line = checkEnd(line, BLOOKSTART);
         String met = getFirstWord(line);
         line = clearSpaces(line.substring(met.length(), line.length()));//remove void
@@ -272,12 +280,12 @@ public abstract class Block {
 
     private void CreateMethode(String line) throws CompEx {
 
-        String[]lineArray=getMethodName(line);
+        String[] lineArray = getMethodName(line);
         if (lineArray.length < 1) {
             throw new CompEx();
         }
         String name = lineArray[0];//method name
-        String param=lineArray[1];
+        String param = lineArray[1];
         name = clearSpaces(name);
         this.scopeLines.clear();
         if (IsDefinedM(name) == null) {
@@ -285,7 +293,7 @@ public abstract class Block {
             if (lineArray.length < 2 || param.matches(Spacses)) {
                 toAdd = new Method(name);
             } else {
-                if(param.matches("^,.*")){
+                if (param.matches("^,.*")) {
                     throw new CompEx("illegal starter");
                 }
                 toAdd = new Method(name, lineArray[1].split(","));
@@ -298,8 +306,7 @@ public abstract class Block {
     }
 
 
-    private void SetVariable(String line, String type, boolean isfinal) throws CompEx {
-
+    String[] readySet(String line) throws CompEx {
         String[] lineArray = line.split(equles);
         if (lineArray.length != 2) {
             throw new CompEx("didnt get args to set");
@@ -307,11 +314,18 @@ public abstract class Block {
 
         lineArray[VARIABLE] = clearSpaces(lineArray[VARIABLE]);
         lineArray[VALUE] = clearSpaces(lineArray[VALUE]);
-        if (IsDefinedT(lineArray[VARIABLE]) == null) {
-            Type val = IsDefinedT(lineArray[VALUE]);
+        return lineArray;
+
+    }
+
+
+    void SetVariable(String line, String type, boolean isfinal) throws CompEx {
+
+        String[] lineArray = readySet(line);
+        if (IsDefinedTGlob(lineArray[VARIABLE]) == null) {
+            Type val = IsDefinedTGlob(lineArray[VALUE]);
             if (val != null) {
                 lineArray[VALUE] = assignVariable(val, type);
-
             }
             Type ToAdd = new Type(type, lineArray[VARIABLE], lineArray[VALUE]);
             if (isfinal) {
@@ -331,7 +345,7 @@ public abstract class Block {
      */
 
     String assignVariable(Type val, String type) throws CompEx {
-        if (val.getVar() != null) {
+        if (val.getVar() != null|| val.isParamter) {
             if (val.getType().equals("double") && type.equals("int")) {
                 throw new CompEx("fuck you");
             }
@@ -342,12 +356,12 @@ public abstract class Block {
 
     }
 
-    protected boolean PlaceVariavle(String type, String name, boolean Isfinal) throws CompEx {
+    boolean PlaceVariavle(String type, String name, boolean Isfinal,boolean isparamter) throws CompEx {
         if (Isfinal) {
             throw new CompEx("cannt start final without value");
         }
         name = clearSpaces(name);
-        if (IsDefinedT(name) == null) {
+        if (IsDefinedTGlob(name) == null) {
             Type toadd = new Type(type, name);
             DEFINED_VAR.put(toadd.getName(), toadd);
             return true;
@@ -375,7 +389,7 @@ public abstract class Block {
             if (s.contains(equles)) {//if assignment
                 SetVariable(s, type, IsFinal);
             } else {
-                if (!PlaceVariavle(type, s, IsFinal)) {//if declaration
+                if (!PlaceVariavle(type, s, IsFinal,false)) {//if declaration todo magic false
                     throw new CompEx("the variable was defined");
                 }
             }

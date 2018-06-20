@@ -18,7 +18,6 @@ public class MainBlock extends Block {
 
     int barketCount = 0;
     ArrayList<MethodBlock> Scopes = new ArrayList<MethodBlock>();
-    Block fatherBlock = null;
 
     private static final String StartMethode = "[{]$";
     private static final String EndMethode = "[}]$";
@@ -54,8 +53,8 @@ public class MainBlock extends Block {
                 index++;
             }
         }
-        AddDefined();
         for (MethodBlock block : this.Scopes) {
+            block.setFatherBlock(this);
             block.CheckBlock();
         }
         if (this.barketCount != 0) {
@@ -68,7 +67,7 @@ public class MainBlock extends Block {
         ArrayList<Type> param = met.getParameters();
         if (param != null) {
             for (Type t : param) {
-                block.PlaceVariavle(t.getType(), t.getName(), t.getisFinal());
+                block.PlaceVariavle(t.getType(), t.getName(), t.getisFinal(),t.isParamter());
             }
         }
 
@@ -80,7 +79,7 @@ public class MainBlock extends Block {
             addParam(block);
             this.curMethod = null;
         }
-        this.Scopes.add(new MethodBlock(lines));
+        this.Scopes.add(block);
         this.scopeLines = new ArrayList<String>();
     }
 
@@ -119,10 +118,5 @@ public class MainBlock extends Block {
         CheckLine(line);
     }
 
-    void AddDefined() {
-        for (MethodBlock block : this.Scopes) {
-            block.AddVars(this.DEFINED_VAR);
-            block.setFatherBlock(this);
-        }
-    }
+
 }

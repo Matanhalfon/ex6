@@ -27,16 +27,17 @@ public class Type {
     private static final Pattern BOOLEANP = Pattern.compile(BOOLEAN);
     private static final Pattern STRINGP = Pattern.compile(STRING);
     private static final Pattern CHARP = Pattern.compile(CHAR);
+    boolean isParamter=false;
 
 
     Type(String type, String name, String var) throws CompEx {
-        this.type = type;
+        setType(type);
         setName(name);
         ChangeVar(var);
     }
 
     Type(String type, String name) throws CompEx {
-        this.type = type;
+        setType(type);
         setName(name);
     }
 
@@ -113,6 +114,14 @@ public class Type {
 
     public String getType() {
         return type;
+    }
+
+    public void setParamter() {
+        isParamter = true;
+    }
+
+    public boolean isParamter() {
+        return isParamter;
     }
 
     private void setType(String type) throws CompEx {

@@ -39,7 +39,7 @@ public class ConditionBlock extends MethodBlock {
                 throw new CompEx("illegal val");
 //            } else {
 //                String[] conInner = var.split(DOUBLEEQLS);
-//                Type con = IsDefinedT(conInner[0]);
+//                Type con = IsDefinedTGlob(conInner[0]);
 //                if (!validCondition(con)) {
 //                    throw new CompEx("illegal val");
 //                }
@@ -63,7 +63,7 @@ public class ConditionBlock extends MethodBlock {
 
     private boolean conditionType(String condition) throws CompEx {
         String[] conditionVars = condition.split(EQUALS);
-        Type var = IsDefinedT(conditionVars[0]);
+        Type var = IsDefinedTGlob(conditionVars[0]);
         if (condition.matches(BOOLEANRegex)) {
             return true;
         } else if (condition.matches(INTRegex) || condition.matches(DOUBLERegex)) {

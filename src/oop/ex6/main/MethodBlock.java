@@ -2,7 +2,6 @@ package oop.ex6.main;
 
 import java.util.*;
 import java.lang.String;
-import java.util.concurrent.locks.Condition;
 
 public class MethodBlock extends MainBlock {
 
@@ -57,8 +56,8 @@ public class MethodBlock extends MainBlock {
         }
         int i = 0;
         String line = null;
-        while (i < this.lines.size() ) {
-            if((this.ismethod)&&(i==this.lines.size()-1)){
+        while (i < this.lines.size()) {
+            if ((this.ismethod) && (i == this.lines.size() - 1)) {
                 break;
             }
             line = lines.get(i);
@@ -87,16 +86,20 @@ public class MethodBlock extends MainBlock {
 
     @Override
     protected void assignVal(Type arg, String variable) throws CompEx {
-        Type value = IsDefinedT(clearSpaces(variable));
-        if(arg.getisFinal()){
+        Type value = IsDefinedTGlob(clearSpaces(variable));
+        if (arg.getisFinal()) {
             throw new CompEx();
         }
         if (value != null) {
-
-            if (value.getVar() == null) {
+            if (value.getVar() == null && !value.isParamter) {
                 throw new CompEx("try to assign null");
             }
-            Type ScopeType = new Type(arg.getType(), arg.getName(), arg.getVar());
+            Type ScopeType = null;
+            if (!value.isParamter) {
+                ScopeType = new Type(arg.getType(), arg.getName(), arg.getVar());
+            } else {
+                ScopeType = new Type(arg.getType(), arg.getName());
+            }
             this.DEFINED_VAR.put(ScopeType.getName(), ScopeType);
         }
         if (value == null) {
@@ -107,7 +110,7 @@ public class MethodBlock extends MainBlock {
 
 
     void AddDefined(MethodBlock block) {
-        block.AddVars(this.DEFINED_VAR);
+//        block.AddVars(this.DEFINED_VAR);
         block.setFatherBlock(this);
     }
 
@@ -140,6 +143,64 @@ public class MethodBlock extends MainBlock {
             case RETURN:
                 break;
         }
+    }
+
+
+    @Override
+    void SetVariable(String line, String type, boolean isfinal) throws CompEx {
+        String[] lineArray = readySet(line);
+        if (IsDefinedT(lineArray[VARIABLE]) == null) {
+            Type val = IsDefinedTGlob(lineArray[VALUE]);
+            Type ToAdd = null;
+            if (val != null) {
+                lineArray[VALUE] = assignVariable(val, type);
+                if (val.isParamter) {
+                    ToAdd=new Type(type,lineArray[VARIABLE]);
+                    ToAdd.setParamter();
+                }
+                else {
+                    ToAdd = new Type(type, lineArray[VARIABLE], lineArray[VALUE]);
+
+                }
+            } else {
+                ToAdd = new Type(type, lineArray[VARIABLE], lineArray[VALUE]);
+            }
+            if (isfinal) {
+                ToAdd.setFinal();
+                DEFINED_VAR.put(ToAdd.getName(), ToAdd);
+            } else {
+                this.DEFINED_VAR.put(ToAdd.getName(), ToAdd);
+            }
+        } else {
+            throw new CompEx("variablewas assigned ");
+        }
+
+    }
+
+    @Override
+    boolean PlaceVariavle(String type, String name, boolean Isfinal, boolean ismeparamter) throws CompEx {
+        if (Isfinal) {
+            throw new CompEx("cannt start final without value");
+        }
+        name = clearSpaces(name);
+        if (IsDefinedT(name) == null) {
+            Type toadd = new Type(type, name);
+            if (ismeparamter) {
+                toadd.setParamter();
+            }
+            this.DEFINED_VAR.put(toadd.getName(), toadd);
+            return true;
+        }
+        return false;
+    }
+
+    private Type IsDefinedT(String name) {
+        Block block = this;
+        if (block.DEFINED_VAR.containsKey(name)) {
+            return this.DEFINED_VAR.get(name);
+        }
+
+        return null;
     }
 
 

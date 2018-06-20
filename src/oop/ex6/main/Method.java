@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class Method {
     private String name;
-    private ArrayList<Type> parameters = new ArrayList<Type>();
+    private ArrayList<Type> parameters = null;
     private static final String Spacses = "^\\s+|\\s+$";
     private static final String GoodName = "\\s*[a-zA-Z]\\s*|\\s*[a-zA-Z]+\\w*\\s*";
 
@@ -18,13 +18,14 @@ public class Method {
 
     Method(String name) throws CompEx {
         setName(name);
-        this.parameters = null;
     }
 
     private void isDefinedparam(String name) throws CompEx {
-        for (Type t : this.parameters) {
-            if (t.getName().equals(name)) {
-                throw new CompEx("paramter already defned");
+        if (this.parameters != null) {
+            for (Type t : this.parameters) {
+                if (t.getName().equals(name)) {
+                    throw new CompEx("paramter already defned");
+                }
             }
         }
     }
@@ -45,7 +46,7 @@ public class Method {
 
 
     private ArrayList<String> clearEmepty(String[] param) {
-        ArrayList<String> toreturn=new ArrayList<String>();
+        ArrayList<String> toreturn = new ArrayList<String>();
         for (String aParam : param) {
             if (!aParam.equals("")) {
                 toreturn.add(aParam);
@@ -56,15 +57,19 @@ public class Method {
 
 
     private void BulidParmeters(String[] paramArgs) throws CompEx {
+        if(!paramArgs[0].equals("")){
+            this.parameters=new ArrayList<Type>();
+        }
         for (String s : paramArgs) {
             s = clearSpaces(s);
             String[] sArra = s.split("\\s");
-            ArrayList<String> sArray=clearEmepty(sArra);
+            ArrayList<String> sArray = clearEmepty(sArra);
             if (sArray.size() == 3) {
                 if (sArray.get(0).equals("final")) {
                     isDefinedparam(sArray.get(2));
                     Type ToAdd = new Type(sArray.get(1), sArray.get(2));
                     ToAdd.setFinal();
+                    ToAdd.setParamter();
                     this.parameters.add(ToAdd);
                 } else {
                     throw new CompEx("death");
@@ -72,7 +77,9 @@ public class Method {
 //                else { check if 3 param not final legal
             } else if (sArray.size() == 2) {
                 isDefinedparam(sArray.get(1));
-                this.parameters.add(new Type(sArray.get(0), sArray.get(1)));
+                Type ToAdd=new Type(sArray.get(0), sArray.get(1));
+                ToAdd.setParamter();
+                this.parameters.add(ToAdd);
             } else if (sArray.size() == 0) {
                 return;
             } else {
