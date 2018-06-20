@@ -17,13 +17,14 @@ public class MainBlock extends Block {
      */
 
     int barketCount = 0;
-    ArrayList<String> scopeLines = new ArrayList<String>();
-    ArrayList<MethodBlock> methodScopes = new ArrayList<MethodBlock>();
+    ArrayList<MethodBlock> Scopes = new ArrayList<MethodBlock>();
+    Block fatherBlock = null;
 
-    private static final String StartMethode = "[{]+$";
-    private static final String EndMethode = "[}]+$";
+    private static final String StartMethode = "[{]$";
+    private static final String EndMethode = "[}]$";
     private Pattern patternS = Pattern.compile(StartMethode);
     private Pattern patternE = Pattern.compile(EndMethode);
+    private String curMethod;
 
     MainBlock(ArrayList<String> SjavaLines) {
         super(SjavaLines);
@@ -34,48 +35,94 @@ public class MainBlock extends Block {
         int index = 0;
         String line = null;
         while (index < this.lines.size()) {
-            line = this.lines.get(index).trim();
+            line = clearSpaces(this.lines.get(index));
             while (0 < this.barketCount) {
-                scopeLines.add(line);
+                if (index > this.lines.size()) {
+                    throw new CompEx("illegal num of barkests");
+                }
+                line = clearSpaces(line);
                 index++;
                 updateBarkets(line);
-                line = this.lines.get(index);
+                scopeLines.add(clearSpaces(line));
+                if (index < lines.size()) {
+                    line = clearSpaces(lines.get(index));
+                }
             }
-            compaileLine(line);
-            updateBarkets(line);
-            index++;
+            if (index < this.lines.size()) {
+                compaileLine(line);
+                updateBarkets(line);
+                index++;
+            }
+        }
+        AddDefined();
+        for (MethodBlock block : this.Scopes) {
+            block.CheckBlock();
+        }
+        if (this.barketCount != 0) {
+            throw new CompEx("illegal num of burkets");
         }
     }
 
-    private void updateBarkets(String line) {
+    void addParam(MethodBlock block) throws CompEx {
+        Method met = IsDefinedM(this.curMethod);
+        ArrayList<Type> param = met.getParameters();
+        if (param != null) {
+            for (Type t : param) {
+                block.PlaceVariavle(t.getType(), t.getName(), t.getisFinal());
+            }
+        }
+
+    }
+
+    void createScope(ArrayList<String> lines) throws CompEx {
+        MethodBlock block = new MethodBlock(lines);
+        if (this.curMethod != null) {
+            addParam(block);
+            this.curMethod = null;
+        }
+        this.Scopes.add(new MethodBlock(lines));
+        this.scopeLines = new ArrayList<String>();
+    }
+
+    /*
+    update the num of barkets and act accordingly
+     */
+
+    void updateBarkets(String line) throws CompEx {
         Matcher matcherStart = patternS.matcher(line);
         Matcher matcherEnd = patternE.matcher(line);
         if (matcherStart.find()) {
+            if (this.barketCount == 0) {
+                this.curMethod = clearSpaces(getMethodName(line)[0]);
+            }
             this.barketCount++;
         }
         if (matcherEnd.find()) {
+            if (!line.matches("\\s*[}]\\s*")){
+                throw new CompEx("illegal num barkets");
+            }
             if (this.barketCount == 1) {
-                this.methodScopes.add(new MethodBlock(this.scopeLines));
-                this.scopeLines.clear();
+                createScope(this.scopeLines);
             }
             this.barketCount--;
         }
     }
 
     private void compaileLine(String line) throws CompEx {
+        if (this.barketCount > 0) {
+            return;
+        }
         if (this.barketCount < 0) {
             throw new CompEx("illegal num of barkets");
         }
-        if (this.barketCount == 0) {
-            CheckLine(line);
-        }
 
+        CheckLine(line);
     }
 
-    private void AddDefined() {
-        for (MethodBlock block : this.methodScopes) {
-            block.AddVars(this.DEFINED_VAR)
-            ;
+    void AddDefined() {
+        for (MethodBlock block : this.Scopes) {
+            block.AddVars(this.DEFINED_VAR);
+            block.setFatherBlock(this);
         }
     }
 }

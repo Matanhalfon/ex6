@@ -2,86 +2,82 @@ package oop.ex6.main;
 
 import java.util.ArrayList;
 
-public class ConditionBlock extends Block {
+public class ConditionBlock extends MethodBlock {
 
-    private static final String OR = "\\||";
+    private static final String OR = "\\|\\|";
     private static final String AND = "\\&&";
-    private static final String INT = "\\d+";
-    private static final String DOUBLE = "\\d*[.]\\d+";
-    private static final String BOOLEAN = "[true,false]";
-    private static final String STRING = ".+";
-    private static final String CHAR = ".{1}";
+    private static final String INTRegex = "\\s*\\-?\\d+\\s*";
+    private static final String DOUBLERegex = "\\s*\\-?\\d*[.]\\d+\\s*";
+    private static final String BOOLEANRegex = "\\s*(true){1}\\s*|\\s*(false){1}\\s*";
     private static final String EQUALS = "=";
     private static final String DOUBLEEQLS = "==";
+    private static final String INT = "int";
+    private static final String BOOLEAN = "boolean";
+    private static final String DOUBLE = "double";
 
-    /**
-     * create a methode that run over the internal lines and throw if needed
-     *
-     * @param SjavaLines
-     */
-    public ConditionBlock(ArrayList<String> SjavaLines) {
+
+    public ConditionBlock(ArrayList<String> SjavaLines) throws CompEx {
         super(SjavaLines);
+        this.ismethod = false;
     }
 
-    private void checkBlock(String[] lines) throws CompEx{
-        String first = lines[0];
-        checkEnd(first, "{");
-        // cut the condition
-        String condition = first.substring(first.indexOf("("), first.lastIndexOf(")"));
-        CheckCondition(condition);
-        for (int i = 1; i < lines.length; i++){
-            CheckLine(lines[i]);
+
+    boolean CheckCondition(String condition) throws CompEx {
+        if (condition == null) {
+            return false;
         }
-    }
-
-
-    public void AddVars(ArrayList<Type> globalvars) {
-        this.DEFINED_VAR.addAll(globalvars);
-    }
-
-    private boolean CheckCondition(String condition) throws CompEx {
         String[] conditions = condition.split(OR);
-        ArrayList<String> conArry = new ArrayList<String>();
+        ArrayList<String> conArray = new ArrayList<String>();
         for (String con : conditions) {
             String[] temp = con.split(AND);
             for (String t : temp) {
-                conArry.add(t);
+                conArray.add(t);
             }
         }
-        for (String var : conArry) {
-            if (conditionType(var)){
-                return true;
-            }
-            String[] conInner = var.split(DOUBLEEQLS);
-            Type con = IsDefinedT(conInner[0]);
-            if (con != null && con.getVar()!=null){
-                return true;
-            }else {
-                throw new CompEx();
+        for (String var : conArray) {
+            if (!conditionType(clearSpaces(var))) {
+                throw new CompEx("illegal val");
+//            } else {
+//                String[] conInner = var.split(DOUBLEEQLS);
+//                Type con = IsDefinedT(conInner[0]);
+//                if (!validCondition(con)) {
+//                    throw new CompEx("illegal val");
+//                }
             }
         }
         return true;
     }
 
+
+    private boolean validCondition(Type con) throws CompEx {
+        if (con != null) {
+            if (con.getVar() != null) {
+                if (conditionType(con.getVar())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     private boolean conditionType(String condition) throws CompEx {
         String[] conditionVars = condition.split(EQUALS);
         Type var = IsDefinedT(conditionVars[0]);
-        if (condition.matches(BOOLEAN)) {
+        if (condition.matches(BOOLEANRegex)) {
             return true;
-        } else if (condition.matches(INT) || condition.matches(DOUBLE)) {
+        } else if (condition.matches(INTRegex) || condition.matches(DOUBLERegex)) {
             return true;
         } else if (var != null) {
-            if (var.getType().equals(TypesEnm.BOOLEAN) || var.getType().equals(TypesEnm.INT) ||
-                    var.getType().equals(TypesEnm.DOUBLE)) {
-                if (var.getVar() == null) {
-                    throw new CompEx();
-                }
-                return true;
+            String val = var.getVar();
+            if (val == null) {
+                throw new CompEx("no condtion var");
             }
-            return false;
+            return (val.matches(INTRegex) || val.matches(BOOLEANRegex) || val.matches(DOUBLERegex));
         }
         return false;
     }
 }
+
 
 

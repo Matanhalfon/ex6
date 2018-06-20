@@ -9,7 +9,7 @@ public class Parser {
     private BufferedReader Reader;
     private ArrayList<String> GOODLINES;
     //REGEX
-    String BadLine = "^\\/{2,}.*|[\\s*]";
+    String BadLine = "^\\/{2,}.*|\\s*";
     Pattern Nolines = Pattern.compile(BadLine);
 
 

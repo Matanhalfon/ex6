@@ -19,7 +19,7 @@ public class Type {
     private static final String GoodName = "\\s*[_]\\w+\\s*|\\s*[a-zA-Z]+\\w*\\s*";
     private static final String INT = "\\s*\\-?\\d+\\s*";
     private static final String DOUBLE = "\\s*\\-?\\d*[.]\\d+\\s*";
-    private static final String BOOLEAN = "(true){1}|(false){1}";
+    private static final String BOOLEAN = "\\s*(true){1}\\s*|\\s*(false){1}\\s*";
     private static final String STRING = "\\s*\".*\"\\s*";
     private static final String CHAR = "\\s*\'.{1}\'\\s*";
     private static final Pattern INTP = Pattern.compile(INT);
@@ -44,6 +44,9 @@ public class Type {
         return var;
     }
 
+    public boolean getisFinal() {
+        return IsFinal;
+    }
 
     public void ChangeVar(String var) throws CompEx {
 
