@@ -30,13 +30,13 @@ public class Type {
 
 
     Type(String type, String name, String var) throws CompEx {
-        this.type = type;
+        setType(type);
         setName(name);
         ChangeVar(var);
     }
 
     Type(String type, String name) throws CompEx {
-        this.type = type;
+        setType(type);
         setName(name);
     }
 
