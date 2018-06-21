@@ -14,7 +14,7 @@ public class MethodBlock extends MainBlock {
     /*
     representing the method scope , getting the methods line
      */
-    MethodBlock(ArrayList<String> SjavaLines) throws CompEx {
+    public MethodBlock(ArrayList<String> SjavaLines) throws CompEx {
         super(SjavaLines);
 
     }

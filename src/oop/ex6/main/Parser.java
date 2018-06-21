@@ -16,7 +16,6 @@ public class Parser {
     public Parser(File jfile) throws IOEx {
         try {
 
-            ArrayList<String> ParsedFiles = new ArrayList<String>();
             this.Reader = new BufferedReader(new FileReader(jfile));
             this.GOODLINES = new ArrayList<String>();
             ParsedFiles(jfile);
@@ -43,10 +42,10 @@ public class Parser {
     }
 
 
-        public ArrayList<String> getGOODLINES () {
-            return GOODLINES;
-        }
+    public ArrayList<String> getGOODLINES() {
+        return this.GOODLINES;
     }
+}
 
 
 
