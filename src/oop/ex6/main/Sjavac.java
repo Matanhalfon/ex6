@@ -4,7 +4,10 @@ import java.io.*;
 import com.sun.tools.javac.Main;
 
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.text.ParseException;
 import java.util.ArrayList;
+
 
 public class Sjavac {
 
@@ -20,12 +23,12 @@ public class Sjavac {
                 System.out.println(1);
                 return;
             }
-            catch (IOException e){
+            catch (IOEx e){
                 System.out.println(2);
+                System.err.println(e.getMessage());
                 return;
             }
         System.out.println(0);
         }
-
 
     }

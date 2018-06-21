@@ -13,30 +13,40 @@ public class Parser {
     Pattern Nolines = Pattern.compile(BadLine);
 
 
-    public Parser(File jfile) throws IOException {
-        ArrayList<String> ParsedFiles = new ArrayList<String>();
-        this.Reader = new BufferedReader(new FileReader(jfile));
-        this.GOODLINES=new ArrayList<String>();
-        ParsedFiles(jfile);
+    public Parser(File jfile) throws IOEx {
+        try {
+
+            ArrayList<String> ParsedFiles = new ArrayList<String>();
+            this.Reader = new BufferedReader(new FileReader(jfile));
+            this.GOODLINES = new ArrayList<String>();
+            ParsedFiles(jfile);
+        } catch (FileNotFoundException e) {
+            throw new IOEx("ERROR: not found file");
+        }
     }
 
-    private void ParsedFiles(File jfile) throws IOException {
-        String curLine = this.Reader.readLine();
-        while (curLine != null) {
-            Matcher match = Nolines.matcher(curLine);
-            if (!match.matches()) {
-                GOODLINES.add(curLine);
+    private void ParsedFiles(File jfile) throws IOEx {
+        try {
+            String curLine = this.Reader.readLine();
+            while (curLine != null) {
+                Matcher match = Nolines.matcher(curLine);
+                if (!match.matches()) {
+                    GOODLINES.add(curLine);
+                }
+                curLine = Reader.readLine();
+
             }
-            curLine = Reader.readLine();
+        } catch (IOException e) {
+            throw new IOEx("ERROR: can not read the file");
 
         }
     }
 
 
-    public ArrayList<String> getGOODLINES() {
-        return GOODLINES;
+        public ArrayList<String> getGOODLINES () {
+            return GOODLINES;
+        }
     }
-}
 
 
 
