@@ -66,6 +66,9 @@ public class ConditionBlock extends MethodBlock {
         }
         return true;
     }
+    /*
+    checks if the condition is legal
+     */
 
 
     private boolean conditionType(String condition) throws CompEx {
