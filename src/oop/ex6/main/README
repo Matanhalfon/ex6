@@ -1,0 +1,62 @@
+matan.halfon
+yahel.yed
+
+
+=============================
+=      File description     =
+=============================
+Sjavac - the main class. The class gets a file directory and implements all the Sjavac checks by using
+            all other classes.
+Parser - a class that gets Sjavac file, reading the file and convert it to ArrayList of lines. The
+            class also ignore the comments lines and the empty lines.
+Block - abstract class that initialize blocks and implements all the blocks methods.
+MainBlock - subclass of Block. The class run over all the file lines and initialize the blocks
+            according to their types.
+MethodBlock - subclass of Block. The class initialize block of method and implements all the checks
+            that method require by using his methods and Method class methods.
+ConditionBlock - subclass of MethodBlock. The class initialize block of condition (while or if cases)
+            and implements all the checks that the condition require.
+Method - a class that construct a new method.
+Type - a class that construct a new variable.
+
+TypeEnum - Enum class that holding all the types.
+
+Exceptions:
+    CompEx - exception that thrown when one of the checks is failed. The exception caught in the main
+            class and print 1 to the user.
+    IOEx - wrapper exception to IOException that added a message for the user. The exception thrown
+            in IO exception case and caught in the main class and print 2 and the error message
+            to the user.
+
+
+=============================
+=          Design           =
+=============================
+We decided to build Block class as abstract class because we understood that the ratio between this class to
+MethodBlock and ConditionBlock and MainBlock is "is a" ratio. We considered to build Method class and Type
+class as Interface but we release that there method that we want to implements in that classes and it prevents
+us from doing that, so we finally decided to build a class for that purpose.
+With the understanding that there are constants in the code that we use frequently in all the classes, and we
+need a common language for this, we decided to build a Enum class that holds all the required types in
+different places in the code.
+
+=============================
+=  Implementation details   =
+=============================
+We apply the Block classes so that they all inherit from the Block class and the ConditionBlock class
+inherits from the MethodBlock class. This is due to the thought that a Condition can only appear within
+a Method and therefore will always want to use the information of the Method above it.
+In addition, the inheritance allows each block to hold its parent block and thus we overcome the problem
+of global variables.
+For exception handle, we decided to build a new Exception which will be thrown every time that one of the
+tests falls, the exception caught in the main class, Sjavac class, and print error as required.
+For deal with IOException, we decided to build a new envelope exception, which will catch the IO errors that
+are thrown, and add an informative message to the user. Using this tool we are able to provide the user
+with information to deal with this type of errors.
+We decided to use HashSet as the data structure that holding the methods object and the type object because
+we want to provide better run time for getting the objects from the data.
+
+=============================
+=    Answers to questions   =
+=============================
+
