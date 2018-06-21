@@ -26,6 +26,9 @@ public class ConditionBlock extends MethodBlock {
     /*A constant that represent equals*/
     private static final String EQUALS = "=";
 
+    /*A constant that represent the place of the var value in the list*/
+    private static final int VAR = 0;
+
 
     /**
      * A constructor that initialize block of condition
@@ -49,7 +52,7 @@ public class ConditionBlock extends MethodBlock {
             return false;
         }
         String[] conditions = condition.split(OR);
-        ArrayList<String> conArray = new ArrayList<String>();
+        ArrayList<String> conArray = new ArrayList<>();
         for (String con : conditions) {
             String[] temp = con.split(AND);
             for (String t : temp) {
@@ -58,28 +61,16 @@ public class ConditionBlock extends MethodBlock {
         }
         for (String var : conArray) {
             if (!conditionType(clearSpaces(var))) {
-                throw new CompEx("illegal val");
+                throw new ValveEx();
             }
         }
         return true;
     }
 
 
-    private boolean validCondition(Type con) throws CompEx {
-        if (con != null) {
-            if (con.getVar() != null) {
-                if (conditionType(con.getVar())) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
     private boolean conditionType(String condition) throws CompEx {
         String[] conditionVars = condition.split(EQUALS);
-        Type var = IsDefinedTGlob(conditionVars[0]);
+        Type var = IsDefinedTGlob(conditionVars[VAR]);
         if (condition.matches(BOOLEANREGEX)) {
             return true;
         } else if (condition.matches(INTREGEX) || condition.matches(DOUBLEREGEX)) {
@@ -87,7 +78,7 @@ public class ConditionBlock extends MethodBlock {
         } else if (var != null) {
             String val = var.getVar();
             if (val == null) {
-                throw new CompEx("no condtion var");
+                throw new ValveEx();
             }
             return (val.matches(INTREGEX) || val.matches(BOOLEANREGEX) || val.matches(DOUBLEREGEX));
         }
