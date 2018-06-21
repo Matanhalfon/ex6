@@ -27,6 +27,8 @@ Exceptions:
     IOEx - wrapper exception to IOException that added a message for the user. The exception thrown
             in IO exception case and caught in the main class and print 2 and the error message
             to the user.
+    ValueEx - subclass of CompEx. Exception that thrown when their is bad value error.
+    SynEx - subclass of CompEx. Exception that thrown when their is syntax error.
 
 
 =============================

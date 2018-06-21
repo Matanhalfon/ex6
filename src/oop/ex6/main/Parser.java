@@ -15,7 +15,7 @@ public class Parser {
 
     /*The error message in case of can not read the file error*/
     private static final String CANT_READ_ERR_MSG = "ERROR: can not read the file";
-    
+
     /*A reader of files*/
     private BufferedReader Reader;
 
