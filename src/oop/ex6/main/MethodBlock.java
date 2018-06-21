@@ -48,7 +48,7 @@ public class MethodBlock extends MainBlock {
         if (this.barketCount == 0) {
             return false;
         } else {
-            throw new CompEx("illegal num of barkets in method");
+            throw new SynEx();
         }
     }
 
@@ -118,7 +118,7 @@ public class MethodBlock extends MainBlock {
         if (conBlock.CheckCondition(this.curCondoition)) {
             conBlock.CheckBlock();
         } else {
-            throw new CompEx("illegal condition");
+            throw new ValveEx();
         }
         this.scopeLines = new ArrayList<String>();
     }
@@ -167,7 +167,7 @@ public class MethodBlock extends MainBlock {
                 this.DEFINED_VAR.put(ToAdd.getName(), ToAdd);
             }
         } else {
-            throw new CompEx("variablewas assigned ");
+            throw new ValveEx();
         }
 
     }
@@ -175,7 +175,7 @@ public class MethodBlock extends MainBlock {
     @Override
     boolean PlaceVariavle(String type, String name, boolean Isfinal, boolean ismeparamter) throws CompEx {
         if (Isfinal) {
-            throw new CompEx("cannt start final without value");
+            throw new SynEx();
         }
         name = clearSpaces(name);
         if (IsDefinedT(name) == null) {
@@ -211,12 +211,12 @@ public class MethodBlock extends MainBlock {
         line = checkEnd(line, METHODEND);
         String[] nameArray = line.split(BARKET);
         if (nameArray.length <= 1) {
-            throw new CompEx("no condition");
+            throw new SynEx();
         }
         String name = clearSpaces(nameArray[CONNAME]);
         int index = line.indexOf(BARKET);
         if (index < 0) {
-            throw new CompEx("no barket ");
+            throw new SynEx();
         }
         return name;
 
