@@ -15,9 +15,12 @@ public abstract class Block {
     static final int RETURN = 6;
     static final int VARIABLE = 0;
     static final int VALUE = 1;
+    static final int PARAMETERS = 1;
+    static final int METHDNAME = 0;
     private static final int FIRSTWORD = 0;
+    private static final String COMA = ",";
     private static final String equles = "=";
-    static final String RETURNLINE = "return\\s*;?";
+    private static final String nothing = "";
     private static final String LINEEND = "line start";
     static final String BLOOKSTART = "Block start";
     private static final String BLOOKEND = "Block end";
@@ -31,8 +34,11 @@ public abstract class Block {
     HashMap<String, Type> DEFINED_VAR = new HashMap<String, Type>();
     HashMap<String, Method> DEFIND_METHODES = new HashMap<String, Method>();
     //Regex
+    static final String RETURNLINE = "return\\s*;?";
     private static final String Spacses = "^\\s+|\\s+$";
-
+    private static final String SpacesCUt = "\\s";
+    private static final String BARKET = "\\(";
+    private static final String EQUELS = "=";
     private static final String EndLine = ".*[;]$";
     private static final String StartMethode = ".*[{]$";
     private static final String EndMethode = "}";
@@ -90,13 +96,13 @@ public abstract class Block {
      * @return the first word
      */
 
-    String getFirstWord(String line) {
-        String[] TheStart = line.split("\\s");
+    private String getFirstWord(String line) {
+        String[] TheStart = line.split(SpacesCUt);
         if (TheStart[FIRSTWORD].contains("(")) {//if there is  a method call
-            TheStart = TheStart[FIRSTWORD].split("\\(");
+            TheStart = TheStart[FIRSTWORD].split(BARKET);
         }
-        if(TheStart[FIRSTWORD].contains("=")){
-            TheStart=TheStart[FIRSTWORD].split("=");
+        if (TheStart[FIRSTWORD].contains(EQUELS)) {
+            TheStart = TheStart[FIRSTWORD].split(EQUELS);
         }
         return clearSpaces(TheStart[FIRSTWORD]);
     }
@@ -138,7 +144,9 @@ public abstract class Block {
         }
         throw new CompEx("illegal line starter");
     }
-
+    /*
+    a method that checks the line start and act accordingly
+     */
 
     void CheckLine(String line) throws CompEx {
         int mark = CheckStart(line);
@@ -157,6 +165,9 @@ public abstract class Block {
                 throw new CompEx("illegal line starter");
         }
     }
+    /*
+    a method that check if a statement is legal
+     */
 
     void CheckStatment(String line) throws CompEx {
         line = checkEnd(line, LINEEND);
@@ -177,14 +188,14 @@ public abstract class Block {
 
     private boolean CheckMethod_call(String line) throws CompEx {
         String[] lineArray = splitbark(line);
-        Method met = IsDefinedM(clearSpaces(lineArray[0]));
+        Method met = IsDefinedM(clearSpaces(lineArray[METHDNAME]));
         if (met != null) {//the method  has been created
-            String param = checkEnd(lineArray[1], METHODEND);
-            String[] paramArray = param.split(",");
+            String param = checkEnd(lineArray[PARAMETERS], METHODEND);
+            String[] paramArray = param.split(COMA);
             for (int i = 0; i < paramArray.length; i++) {
-                Type parmeter = IsDefinedTGlob(paramArray[i]);
-                if (parmeter != null && parmeter.getVar() != null) {
-                    paramArray[i] = parmeter.getVar();
+                Type parameter = IsDefinedTGlob(paramArray[i]);
+                if (parameter != null && parameter.getVar() != null) {
+                    paramArray[i] = parameter.getVar();
                 }
             }
             return met.Checkpar(paramArray);
@@ -203,24 +214,21 @@ public abstract class Block {
     private void CheckAssinment(String line) throws CompEx {
         String[] lineArray = line.split(equles);
         if (lineArray.length < 2) {
-            throw new CompEx();
+            throw new CompEx("try to assign null");
         }
         Type arg = IsDefinedTGlob((clearSpaces(lineArray[VARIABLE])));
         assignVal(arg, clearSpaces(lineArray[VALUE]));
     }
 
-
-    protected void addType(Type variable) {
-        this.DEFINED_VAR.put(variable.getName(), variable);
-    }
-
+    /*
+    a method
+     */
     protected void assignVal(Type arg, String variable) throws CompEx {
         Type value = IsDefinedTGlob(clearSpaces(variable));
         if (value != null) {
             if (value.getVar() == null) {
                 throw new CompEx("try to assign null");
             }
-
             arg.ChangeVar(value.getVar());
 
         } else {
@@ -236,8 +244,8 @@ public abstract class Block {
 
     }
 
-    protected String clearSpaces(String line) {
-        return line.replaceAll(Spacses, "");
+    String clearSpaces(String line) {
+        return line.replaceAll(Spacses, nothing);
     }
 
     Type IsDefinedTGlob(String name) {
@@ -256,12 +264,12 @@ public abstract class Block {
 
 
     private String[] splitbark(String line) throws CompEx {
-        Pattern pat = Pattern.compile("\\(");
+        Pattern pat = Pattern.compile(BARKET);
         Matcher mach = pat.matcher(line);
         if (mach.find()) {
             return new String[]{line.substring(0, mach.start()), line.substring(mach.start() + 1, line.length())};
         }
-        throw new CompEx("no opning barket");
+        throw new CompEx("no opening barket");
     }
 
     String[] getMethodName(String line) throws CompEx {
@@ -269,8 +277,7 @@ public abstract class Block {
         String met = getFirstWord(line);
         line = clearSpaces(line.substring(met.length(), line.length()));//remove void
         line = checkEnd(line, METHODEND);
-        String[] lineArray = splitbark(line);
-        return lineArray;
+        return splitbark(line);
     }
 
 
@@ -348,7 +355,7 @@ public abstract class Block {
      */
 
     String assignVariable(Type val, String type) throws CompEx {
-        if (val.getVar() != null|| val.isParamter) {
+        if (val.getVar() != null || val.isParamter) {
             if (val.getType().equals("double") && type.equals("int")) {
                 throw new CompEx("fuck you");
             }
@@ -359,7 +366,7 @@ public abstract class Block {
 
     }
 
-    boolean PlaceVariavle(String type, String name, boolean Isfinal,boolean isparamter) throws CompEx {
+    boolean PlaceVariavle(String type, String name, boolean Isfinal, boolean isparamter) throws CompEx {
         if (Isfinal) {
             throw new CompEx("cannt start final without value");
         }
@@ -392,7 +399,7 @@ public abstract class Block {
             if (s.contains(equles)) {//if assignment
                 SetVariable(s, type, IsFinal);
             } else {
-                if (!PlaceVariavle(type, s, IsFinal,false)) {//if declaration todo magic false
+                if (!PlaceVariavle(type, s, IsFinal, false)) {//if declaration todo magic false
                     throw new CompEx("the variable was defined");
                 }
             }
