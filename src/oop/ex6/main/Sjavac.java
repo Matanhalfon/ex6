@@ -40,7 +40,7 @@ public class Sjavac {
             }
             File javaFile=new File(args[PATH]);
             Parser parser = new Parser(javaFile);
-            ArrayList<String> SjavaFiles = parser.getGOODLINES();
+            ArrayList<String> SjavaFiles = parser.getGoodLines();
             MainBlock compaler = new MainBlock(SjavaFiles);
             compaler.readLines();
 
