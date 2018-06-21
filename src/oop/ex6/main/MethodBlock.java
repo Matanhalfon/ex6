@@ -5,7 +5,6 @@ import java.lang.String;
 
 public class MethodBlock extends MainBlock {
 
-    private static final String goodName = "^[a-zA-Z]";
     private static final String METHOD_END = "return\\s*;";
     private String curCondoition;
     private ArrayList<ConditionBlock> loopsBlock = new ArrayList<ConditionBlock>();

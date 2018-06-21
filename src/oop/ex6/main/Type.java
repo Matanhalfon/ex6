@@ -29,14 +29,27 @@ public class Type {
     private static final Pattern CHARP = Pattern.compile(CHAR);
     boolean isParamter=false;
 
-
-    Type(String type, String name, String var) throws CompEx {
+    /**
+     * a class that represent a variable
+     * @param type the type of the variable
+     * @param name  the name of the variable
+     * @param var   the value of the variable
+     * @throws CompEx if  one of the args is illegal
+     */
+    public Type(String type, String name, String var) throws CompEx {
         setType(type);
         setName(name);
         ChangeVar(var);
     }
 
-    Type(String type, String name) throws CompEx {
+    /**
+     * a class that represent a variable
+     * @param type the type of the variable
+     * @param name
+     * @throws CompEx
+     */
+
+     public Type(String type, String name) throws CompEx {
         setType(type);
         setName(name);
     }

@@ -21,13 +21,27 @@ public class MainBlock extends Block {
 
     private static final String StartMethode = "[{]$";
     private static final String EndMethode = "[}]$";
+    private Pattern ENDBARKET = Pattern.compile("\\s*[}]\\s*");
     private Pattern patternS = Pattern.compile(StartMethode);
     private Pattern patternE = Pattern.compile(EndMethode);
     private String curMethod;
 
-    MainBlock(ArrayList<String> SjavaLines) {
+    /**
+     * the block of the global scope that parse all the lines and create new scopes
+     * for the methods
+     *
+     * @param SjavaLines the lines that received by the parser and will be checked
+     */
+    public MainBlock(ArrayList<String> SjavaLines) {
         super(SjavaLines);
     }
+
+    /**
+     * the main method it reads the lines of the Sjava code and throw Compilation exception if needed
+     * creates the methods scope that will be checked in the end after all the lines was reed and defined
+     *
+     * @throws CompEx if there is a Compilation error
+     */
 
 
     public void readLines() throws CompEx {
@@ -62,16 +76,22 @@ public class MainBlock extends Block {
         }
     }
 
-    void addParam(MethodBlock block) throws CompEx {
+    /*
+    a method that get a kmethod block and add to it the parameter so they  could be defined
+     */
+    private void addParam(MethodBlock block) throws CompEx {
         Method met = IsDefinedM(this.curMethod);
         ArrayList<Type> param = met.getParameters();
         if (param != null) {
             for (Type t : param) {
-                block.PlaceVariavle(t.getType(), t.getName(), t.getisFinal(),t.isParamter());
+                block.PlaceVariavle(t.getType(), t.getName(), t.getisFinal(), t.isParamter());
             }
         }
-
     }
+
+    /*
+    the method that get the lines of the scopes and then create a method block  accordingly
+     */
 
     void createScope(ArrayList<String> lines) throws CompEx {
         MethodBlock block = new MethodBlock(lines);
@@ -84,7 +104,8 @@ public class MainBlock extends Block {
     }
 
     /*
-    update the num of barkets and act accordingly
+    update the barketcount  and act accordingly ,create method block when getting and throw exception
+    if getting an  negative number
      */
 
     void updateBarkets(String line) throws CompEx {
@@ -92,12 +113,13 @@ public class MainBlock extends Block {
         Matcher matcherEnd = patternE.matcher(line);
         if (matcherStart.find()) {
             if (this.barketCount == 0) {
-                this.curMethod = clearSpaces(getMethodName(line)[0]);
+                this.curMethod = clearSpaces(getMethodName(line)[METHDNAME]);
             }
             this.barketCount++;
         }
         if (matcherEnd.find()) {
-            if (!line.matches("\\s*[}]\\s*")){
+            Matcher mach = ENDBARKET.matcher(line);
+            if (!mach.matches()) {
                 throw new CompEx("illegal num barkets");
             }
             if (this.barketCount == 1) {
@@ -106,6 +128,10 @@ public class MainBlock extends Block {
             this.barketCount--;
         }
     }
+    /*
+    checks if the barket count if bigger then 0  will not check yet if negative will throw exception
+    otherwise will check the line
+     */
 
     private void compaileLine(String line) throws CompEx {
         if (this.barketCount > 0) {
@@ -114,9 +140,6 @@ public class MainBlock extends Block {
         if (this.barketCount < 0) {
             throw new CompEx("illegal num of barkets");
         }
-
         CheckLine(line);
     }
-
-
 }

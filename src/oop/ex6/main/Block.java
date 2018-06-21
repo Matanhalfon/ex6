@@ -8,15 +8,19 @@ import java.util.regex.Pattern;
 
 public abstract class Block {
     static final int CreateType = 1;
-    static final int CreateMethod = 2;
+    private static final int CreateMethod = 2;
     static final int StartLoop = 3;
     static final int CheckLine = 4;
-    static final int ENDMETHOD = 5;
+    private  static final int ENDMETHOD = 5;
     static final int RETURN = 6;
     static final int VARIABLE = 0;
     static final int VALUE = 1;
-    static final int PARAMETERS = 1;
-    static final int METHDNAME = 0;
+    private static final int PARAMETERS = 1;
+    protected static final int METHDNAME = 0;
+    private static final boolean NotParameter = false;
+    private static final String INT="int";
+    private static final String DOUBLE="double";
+    private static final String FINAL="final";
     private static final int FIRSTWORD = 0;
     private static final String COMA = ",";
     private static final String equles = "=";
@@ -39,6 +43,7 @@ public abstract class Block {
     private static final String SpacesCUt = "\\s";
     private static final String BARKET = "\\(";
     private static final String EQUELS = "=";
+    private static final String StartWithComa = "^,.*";
     private static final String EndLine = ".*[;]$";
     private static final String StartMethode = ".*[{]$";
     private static final String EndMethode = "}";
@@ -46,6 +51,7 @@ public abstract class Block {
     private Pattern CLOSBLOOK = Pattern.compile("\\s}{1}\\s*");
     private Pattern IF = Pattern.compile("^if");
     private Pattern WHILE = Pattern.compile("^while");
+    private Pattern BARKETCOM = Pattern.compile(BARKET);
     private Pattern[] LOOP_STARTERS = new Pattern[]{IF, WHILE};
     Block fatherBlock;
 
@@ -54,8 +60,7 @@ public abstract class Block {
         this.lines = SjavaLines;
     }
 
-    public Block() {
-    }
+
 
 
     /**
@@ -221,7 +226,7 @@ public abstract class Block {
     }
 
     /*
-    a method
+    a method that assign a val to an exerting variable
      */
     protected void assignVal(Type arg, String variable) throws CompEx {
         Type value = IsDefinedTGlob(clearSpaces(variable));
@@ -236,6 +241,11 @@ public abstract class Block {
         }
     }
 
+    /*
+    a method that search for a method by it name
+    return - the method , null if not defined
+     */
+
     Method IsDefinedM(String name) {
         if (DEFIND_METHODES.containsKey(name)) {
             return this.DEFIND_METHODES.get(name);
@@ -244,9 +254,19 @@ public abstract class Block {
 
     }
 
+
+    /*
+    a method that clear spaces
+     */
+
     String clearSpaces(String line) {
         return line.replaceAll(Spacses, nothing);
     }
+
+    /*
+    a method that search for a variable if defined in the anywhere in this scope or the above ones
+    return the looked variable null if not defined
+     */
 
     Type IsDefinedTGlob(String name) {
         Block block = this;
@@ -262,15 +282,20 @@ public abstract class Block {
         return null;
     }
 
-
+    /*
+    a method that split the line by it first Barket
+     */
     private String[] splitbark(String line) throws CompEx {
-        Pattern pat = Pattern.compile(BARKET);
+        Pattern pat = BARKETCOM;
         Matcher mach = pat.matcher(line);
         if (mach.find()) {
             return new String[]{line.substring(0, mach.start()), line.substring(mach.start() + 1, line.length())};
         }
         throw new CompEx("no opening barket");
     }
+    /*
+    get the method name from the lne where it is declared
+     */
 
     String[] getMethodName(String line) throws CompEx {
         line = checkEnd(line, BLOOKSTART);
@@ -303,31 +328,35 @@ public abstract class Block {
             if (lineArray.length < 2 || param.matches(Spacses)) {
                 toAdd = new Method(name);
             } else {
-                if (param.matches("^,.*")) {
+                if (param.matches(StartWithComa)) {
                     throw new CompEx("illegal starter");
                 }
-                toAdd = new Method(name, lineArray[1].split(","));
+                toAdd = new Method(name, lineArray[1].split(COMA));
             }
             DEFIND_METHODES.put(toAdd.getName(), toAdd);
         } else {
             //the method is already defined
-            throw new CompEx("themethod is already defained  ");
+            throw new CompEx("the method is already defained  ");
         }
     }
 
-
+    /*
+    a method that get the an array of the sets variable
+     */
     String[] readySet(String line) throws CompEx {
         String[] lineArray = line.split(equles);
         if (lineArray.length != 2) {
             throw new CompEx("didnt get args to set");
         }
-
         lineArray[VARIABLE] = clearSpaces(lineArray[VARIABLE]);
         lineArray[VALUE] = clearSpaces(lineArray[VALUE]);
         return lineArray;
 
     }
 
+    /*
+    set a new variable by name and value and add to the define variables
+     */
 
     void SetVariable(String line, String type, boolean isfinal) throws CompEx {
 
@@ -345,9 +374,8 @@ public abstract class Block {
                 this.DEFINED_VAR.put(ToAdd.getName(), ToAdd);
             }
         } else {
-            throw new CompEx("variablewas assigned ");
+            throw new CompEx("variable was assigned ");
         }
-
     }
 
     /*
@@ -356,8 +384,8 @@ public abstract class Block {
 
     String assignVariable(Type val, String type) throws CompEx {
         if (val.getVar() != null || val.isParamter) {
-            if (val.getType().equals("double") && type.equals("int")) {
-                throw new CompEx("fuck you");
+            if (val.getType().equals(DOUBLE) && type.equals(INT)) {
+                throw new CompEx("try to assgin");
             }
             return val.getVar();
         } else {
@@ -365,6 +393,10 @@ public abstract class Block {
         }
 
     }
+
+    /*
+    set a variable only by name and add to this scope Defined variables
+     */
 
     boolean PlaceVariavle(String type, String name, boolean Isfinal, boolean isparamter) throws CompEx {
         if (Isfinal) {
@@ -379,27 +411,31 @@ public abstract class Block {
         return false;
     }
 
+    /*
+        a method that get a line and crate a type accordingly
+     */
+
 
     void CreateType(String line) throws CompEx {
 
         line = checkEnd(line, LINEEND);
-        if (line.endsWith(",")) {
+        if (line.endsWith(COMA)) {
             throw new CompEx("illegal ,");
         }
         String type = getFirstWord(line);
         boolean IsFinal = false;
-        if (type.equals("final")) {
+        if (type.equals(FINAL)) {
             IsFinal = true;
             line = clearSpaces(line.substring(type.length(), line.length()));//cut the final and the space after
             type = getFirstWord(line);
         }
         line = line.substring(type.length() + 1, line.length());//cut the type and the space after
-        String[] lineArray = line.split(",");//if it is a multi assignment cut to some parts
+        String[] lineArray = line.split(COMA);//if it is a multi assignment cut to some parts
         for (String s : lineArray) {
             if (s.contains(equles)) {//if assignment
                 SetVariable(s, type, IsFinal);
             } else {
-                if (!PlaceVariavle(type, s, IsFinal, false)) {//if declaration todo magic false
+                if (!PlaceVariavle(type, s, IsFinal, NotParameter)) {//if declaration
                     throw new CompEx("the variable was defined");
                 }
             }
