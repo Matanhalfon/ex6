@@ -27,13 +27,14 @@ public class Type {
     private static final Pattern BOOLEANP = Pattern.compile(BOOLEAN);
     private static final Pattern STRINGP = Pattern.compile(STRING);
     private static final Pattern CHARP = Pattern.compile(CHAR);
-    boolean isParamter=false;
+    boolean isParamter = false;
 
     /**
      * a class that represent a variable
+     *
      * @param type the type of the variable
-     * @param name  the name of the variable
-     * @param var   the value of the variable
+     * @param name the name of the variable
+     * @param var  the value of the variable
      * @throws CompEx if  one of the args is illegal
      */
     public Type(String type, String name, String var) throws CompEx {
@@ -44,27 +45,39 @@ public class Type {
 
     /**
      * a class that represent a variable
+     *
      * @param type the type of the variable
-     * @param name
-     * @throws CompEx
+     * @param name the name of the variable
+     * @throws CompEx if one of  the args is  illegal
      */
 
-     public Type(String type, String name) throws CompEx {
+    public Type(String type, String name) throws CompEx {
         setType(type);
         setName(name);
     }
 
+    /**
+     * @return the value of the variable
+     */
     public String getVar() {
         return var;
     }
+
+    /**
+     * @return is the variable is final
+     */
 
     public boolean getisFinal() {
         return IsFinal;
     }
 
+    /**
+     * a method that changes the type value
+     *
+     * @param var the value to set in the variable
+     * @throws CompEx if it is illegal value
+     */
     public void ChangeVar(String var) throws CompEx {
-
-
         if (!IsFinal) {
             TypesEnm Enm = TypesEnm.getValue(this.type);
             switch (Enm) {
@@ -72,12 +85,12 @@ public class Type {
                     if (var.matches(INT)) {
                         this.var = var;
                         break;
-                    } else throw new CompEx("ilegal value I");
+                    } else throw new CompEx("ilegal value");
                 case DOUBLE:
                     if (var.matches(INT) || var.matches(DOUBLE)) {
                         this.var = var;
                         break;
-                    } else throw new CompEx("ilegal value D");
+                    } else throw new CompEx("ilegal value");
                 case CHAR:
                     if (var.matches(CHAR)) {
                         this.var = var;
@@ -107,10 +120,19 @@ public class Type {
 
     }
 
+    /**
+     * @return the variable name
+     */
+
     public String getName() {
         return name;
     }
 
+    /*
+     * change the variable name if needed
+     * @param name the name to set
+     * @throws CompEx if te name is illegal
+     */
     private void setName(String name) throws CompEx {
         Pattern pattern = Pattern.compile(GoodName);
         Matcher match = pattern.matcher(name);
@@ -121,21 +143,47 @@ public class Type {
         }
     }
 
+
+    /**
+     * set the variable to final
+     */
+
     public void setFinal() {
         IsFinal = true;
     }
+
+    /**
+     * @return the variable type
+     */
 
     public String getType() {
         return type;
     }
 
+    /**
+     * set the variable to be parameter
+     */
+
     public void setParamter() {
         isParamter = true;
     }
 
+    /**
+     * check if the variable is a paramter
+     *
+     * @return true if parameter false otherwise
+     */
+
     public boolean isParamter() {
         return isParamter;
     }
+
+    /**
+     * change  the variable type , only in the constructor
+     *
+     * @param type the wanted type
+     * @throws CompEx if it not a legal type
+     */
 
     private void setType(String type) throws CompEx {
         for (String Type : TYPES_list) {

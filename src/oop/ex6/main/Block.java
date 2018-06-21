@@ -24,7 +24,7 @@ public abstract class Block {
     private static final int FIRSTWORD = 0;
     private static final String COMA = ",";
     private static final String equles = "=";
-    private static final String nothing = "";
+    static final String nothing = "";
     private static final String LINEEND = "line start";
     static final String BLOOKSTART = "Block start";
     private static final String BLOOKEND = "Block end";
@@ -41,7 +41,7 @@ public abstract class Block {
     static final String RETURNLINE = "return\\s*;?";
     private static final String Spacses = "^\\s+|\\s+$";
     private static final String SpacesCUt = "\\s";
-    private static final String BARKET = "\\(";
+    static final String BARKET = "\\(";
     private static final String EQUELS = "=";
     private static final String StartWithComa = "^,.*";
     private static final String EndLine = ".*[;]$";

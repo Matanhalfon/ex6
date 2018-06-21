@@ -7,26 +7,26 @@ public class MethodBlock extends MainBlock {
 
     private static final String METHOD_END = "return\\s*;";
     private String curCondoition;
-    private ArrayList<ConditionBlock> loopsBlock = new ArrayList<ConditionBlock>();
     boolean ismethod = true;
+    private static final int CONNAME = 1;
 
 
     /*
-    need to support getting a balck of lines and then run over and throw if needed
+    representing the method scope , getting the methods line
      */
     MethodBlock(ArrayList<String> SjavaLines) throws CompEx {
         super(SjavaLines);
 
     }
 
+    /*
+    set the block father to a wanted block
+     */
+
     void setFatherBlock(Block father) {
         this.fatherBlock = father;
     }
 
-
-    void AddVars(HashMap<String, Type> globalvars) {
-        this.DEFINED_VAR.putAll(globalvars);
-    }
 
     @Override
     Method IsDefinedM(String name) {
@@ -37,6 +37,9 @@ public class MethodBlock extends MainBlock {
             return null;
         }
     }
+    /*
+    true if the method is reading a if\while block
+     */
 
     private Boolean isLooping() throws CompEx {
         if (this.barketCount > 0) {
@@ -48,6 +51,11 @@ public class MethodBlock extends MainBlock {
             throw new CompEx("illegal num of barkets in method");
         }
     }
+
+    /*
+     *checks the method block
+     * @throws CompEx - if the there is a compilation error
+     */
 
     void CheckBlock() throws CompEx {
         if (lines.size() < 1) {
@@ -76,11 +84,6 @@ public class MethodBlock extends MainBlock {
         if (!lines.get(lines.size() - 1).matches(METHOD_END) && this.ismethod) {
             throw new CompEx("no return statment");
         }
-//        AddDefined();
-//        for (MethodBlock scopes : this.Scopes) {
-//            scopes.CheckBlock();
-//        }
-
     }
 
     @Override
@@ -108,18 +111,12 @@ public class MethodBlock extends MainBlock {
     }
 
 
-    void AddDefined(MethodBlock block) {
-//        block.AddVars(this.DEFINED_VAR);
-        block.setFatherBlock(this);
-    }
-
     @Override
     void createScope(ArrayList<String> lines) throws CompEx {
         ConditionBlock conBlock = new ConditionBlock(this.scopeLines);
-        AddDefined(conBlock);
+        conBlock.setFatherBlock(this);
         if (conBlock.CheckCondition(this.curCondoition)) {
             conBlock.CheckBlock();
-//            this.Scopes.add(conBlock);
         } else {
             throw new CompEx("illegal condition");
         }
@@ -154,10 +151,9 @@ public class MethodBlock extends MainBlock {
             if (val != null) {
                 lineArray[VALUE] = assignVariable(val, type);
                 if (val.isParamter) {
-                    ToAdd=new Type(type,lineArray[VARIABLE]);
+                    ToAdd = new Type(type, lineArray[VARIABLE]);
                     ToAdd.setParamter();
-                }
-                else {
+                } else {
                     ToAdd = new Type(type, lineArray[VARIABLE], lineArray[VALUE]);
 
                 }
@@ -193,6 +189,11 @@ public class MethodBlock extends MainBlock {
         return false;
     }
 
+    /*
+     * @param name of  the variable
+     * @return the variable if defined in the current scope null else
+     */
+
     private Type IsDefinedT(String name) {
         Block block = this;
         if (block.DEFINED_VAR.containsKey(name)) {
@@ -201,25 +202,31 @@ public class MethodBlock extends MainBlock {
 
         return null;
     }
-
+    /*
+    get a line and only return the condition in it (first word)
+     */
 
     private String clearCondtion(String line) throws CompEx {
         line = clearSpaces(checkEnd(line, BLOOKSTART));
         line = checkEnd(line, METHODEND);
-        String[] nameArray = line.split("\\(");
+        String[] nameArray = line.split(BARKET);
         if (nameArray.length <= 1) {
             throw new CompEx("no condition");
         }
-        String name = clearSpaces(nameArray[1]);
-        int index = line.indexOf("(");
+        String name = clearSpaces(nameArray[CONNAME]);
+        int index = line.indexOf(BARKET);
         if (index < 0) {
             throw new CompEx("no barket ");
         }
         return name;
 
     }
+    /*
+    start  a loop start the condition
+     lines clear and get the method name
+     */
 
-    void OpenLoop(String line) throws CompEx {
+    private void OpenLoop(String line) throws CompEx {
         line = clearCondtion(line);
         this.scopeLines.clear();
         this.curCondoition = line;

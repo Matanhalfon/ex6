@@ -1,6 +1,7 @@
 package oop.ex6.main;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * subclass of MethodBlock. The class initialize block of condition (while or if cases)
@@ -22,7 +23,6 @@ public class ConditionBlock extends MethodBlock {
 
     /*A constant that represent the "boolean" type regex*/
     private static final String BOOLEANREGEX = "\\s*(true){1}\\s*|\\s*(false){1}\\s*";
-
     /*A constant that represent equals*/
     private static final String EQUALS = "=";
 
